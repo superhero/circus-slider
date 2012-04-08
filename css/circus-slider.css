@@ -1,0 +1,96 @@
+/*
+    Circus Slider - jQuery plugin - Image slider 
+    Copyright (C) 2011  Erik Landvall
+    
+    This file is part of Circus Slider.
+
+    Circus Slider is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses/.
+ */
+
+.circus-slider
+{
+    overflow:
+        hidden;
+}
+
+.circus-slider .circus-slider-viewport
+{
+    margin:
+        0
+        auto;
+
+    position:
+        relative;
+
+    height:
+        100%;
+}
+
+.circus-slider .circus-slider-left-button,
+.circus-slider .circus-slider-right-button
+{
+    width:
+        20px;
+
+    height:
+        100%;
+
+    position:
+        absolute;
+
+    cursor:
+        pointer;
+}
+
+.circus-slider .circus-slider-left-button
+{
+    left:
+        -20px;
+
+    background:
+        #000;
+}
+
+.circus-slider .circus-slider-right-button
+{
+    right:
+        -20px;
+
+    background:
+        #000;
+}
+
+.circus-slider ul
+{
+    position:
+        absolute;
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+    list-style:
+        none;
+}
+
+.circus-slider li
+{
+    float:
+        left;
+
+    list-style:
+        none;
+}
