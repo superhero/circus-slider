@@ -24,10 +24,24 @@
      * - No ul element found
      * - More then 1 ul element found
      * - No li elements found
+     * 
+     * Has the following options:
+     * - showButtons
      */
-    $.fn.circusSlider = function()
+    $.fn.circusSlider = function( options )
     {
-        /* The function that calculates the animation
+        /* Updating the default options with user defined
+         */
+        
+        options = $.extend(
+            {
+                // Determines if the buttons should be shown
+                'showButtons':
+                    false
+            },
+            options );
+        
+        /* The function that calculates the animation movement
          */
         
         var halfMoonAnimation = function( distance, speed )
@@ -101,17 +115,11 @@
                                 ul.append( $( this ).clone( true ));
                             });
                     
-                    /* Creating the viewport and buttons
+                    /* Creating the viewport
                      */
                     
-                    var viewPort   = $( '<div />' )
-                            .addClass( 'circus-slider-viewport' ),
-                            
-                        leftButton = $( '<div />' )
-                            .addClass( 'circus-slider-left-button' ),
-                            
-                        rightButton = $( '<div />' )
-                            .addClass( 'circus-slider-right-button' );
+                    var viewPort = $( '<div />' )
+                            .addClass( 'circus-slider-viewport' );
                     
                     /* Setting sizes
                      */
@@ -128,103 +136,112 @@
                         ul.prepend( $( '> li', ul ).last() );
                     
                     ul.css( 'left', '-' + ( width * 2 ) + 'px' );
-                            
-                    /* Combined variables used in the animation
-                     * 
-                     * A handle to a flag that determines if an animation is
-                     * currently running.
-                     * 
-                     * Retrives the animation array
-                     */
                     
-                    var ani       = false,
-                        animation = halfMoonAnimation( width );
-                            
-                    /* Setting event listeners
+                    /* Setting the viewport
                      */
+                        
+                    ul.wrap( viewPort );
                     
-                    leftButton.click(
-                        function()
-                        {
-                            // Wont start if animation is currently running
-                            if( ani )
-                                return;
-                            
-                            // Stops other animation to start
-                            ani = true;
-                            
+                    /* A flag that determines if an animation is currently
+                     * running.
+                     */
+
+                    var ani = false;
+                    
+                    /* Defines the animation function that slides the slider
+                     */
+                        
+                    var slide = function( slide )
+                    {
+                        // Prevents this animation from starting if there's
+                        // already an animation running
+                        if( ani )
+                            return;
+
+                        // Prevents other animations from starting
+                        ani = true;
+                        
+                        var // Calculating the animation length
+                            length = width * Math.abs( slide ),
+                        
                             // Calculating new position value
-                            var left = ul.position().left - width;
-
-                            // Moves the endblock up front
-                            ul.prepend( $( '> li', ul ).last() );
-                            ul.css( 'left', left + 'px' );
-
-                            // Starts the animation
-                            var i       = 0,
-                                length  = animation.length,
-                                id      = setInterval(
-                                function()
-                                {
-                                    // Will clear interval if we reached the end
-                                    if( i == length)
-                                    {
-                                        clearInterval( id );
-                                        ani = false;
-                                        return;
-                                    }
-
-                                    // Sets the new position value
-                                    ul.css(
-                                        'left',
-                                        ( left + animation[ i++ ] ) + 'px' );
-                                },
-                                20 );
-                        });
-                        
-                    rightButton.click(
-                    
-                        // For documentation, see above eventlistener
-                        function()
-                        {
-                            if( ani )
-                                return;
+                            left = slide < 0
+                                 ? ul.position().left - length
+                                 : ul.position().left + length,
                             
-                            ani = true;
+                            // Retrives the animation array
+                            animation = halfMoonAnimation( length );
+
+                        // Moves the endblock up front or vice versa
+                        for( var n = 0; n < Math.abs( slide ); n++ )
+                            slide < 0
+                                ? ul.prepend( $( '> li', ul ).last() )
+                                : ul.append( $( '> li', ul ).first() );
                             
-                            var left = ul.position().left + width;
+                        // Positioning the content accordingly
+                        ul.css( 'left', left + 'px' );
 
-                            // Moves first block to the end
-                            ul.append( $( '> li', ul ).first() );
-                            ul.css( 'left', left + 'px' );
-
-                            var i       = 0,
-                                length  = animation.length,
-                                id      = setInterval(
-                                function()
+                        // Starts the animation
+                        var i  = 0,
+                            l  = animation.length,
+                            id = setInterval(
+                            function()
+                            {
+                                // Will clear interval if we reached the end
+                                if( i == l )
                                 {
-                                    if( i == length)
-                                    {
-                                        clearInterval( id );
-                                        ani = false;
-                                        return;
-                                    }
+                                    clearInterval( id );
+                                    ani = false;
+                                    return;
+                                }
 
-                                    ul.css(
-                                        'left',
-                                        ( left - animation[ i++ ] ) + 'px' );
-                                },
-                                20 );
-                        });
+                                // Sets the new position value
+                                ul.css(
+                                    'left',
+                                    ( slide < 0
+                                    ? left + animation[ i++ ]
+                                    : left - animation[ i++ ] )
+                                    + 'px' );
+                            },
+                            20 );
+                    }
                     
-                    /* Adding the viewport and buttons
+                    /* Adding the buttons if so desired by the user
                      */
+                    
+                    if( options.showButtons )
+                    {
+                        /* Creating the buttons
+                         */
                         
-                    ul.wrap( viewPort )
-                        .parent()
+                        var leftButton = $( '<div />' )
+                                .addClass( 'circus-slider-left-button' ),
+                            
+                            rightButton = $( '<div />' )
+                                .addClass( 'circus-slider-right-button' );
+                                
+                        /* Setting event listeners for the buttons
+                         */
+
+                        leftButton.click(
+                            function()
+                            {
+                                slide( -1 );
+                            });
+
+                        rightButton.click(
+                            function()
+                            {
+                                slide( 1 );
+                            });
+                        
+                        /* Adding the buttons
+                         */
+                        
+                        ul.parent()
                             .append( leftButton )
                             .append( rightButton );
-                    
+                    }
                 });
         
         return this;
