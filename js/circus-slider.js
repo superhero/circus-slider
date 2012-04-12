@@ -88,33 +88,18 @@
                         throw 'No li elements found';
                     
                     /* Cloning elements
+                     * 
                      * We need 5 li element for a nice flow and a good looking
                      * floded view.
                      */
                     
-                    if( li.length < 5 )
-                    {
-                        var n;
-                        
-                        if( li.length == 1 )
-                            n = 5
-                        
-                        if( li.length == 2 )
-                            n = 3
-                        
-                        if( li.length == 3 || li.length == 4 )
-                            n = 1
-                            
-                        for( var i = 0; i < n; i++ )
-                            li.each(
-                                function()
-                                {
-                                    ul.append( $( this ).clone( true ));
-                                });
-                        
-                        // Re collecting li elements
-                        li = $( '> li', ul );
-                    }
+                    for( var i = li.length; i < 5; )
+                        li.each(
+                            function()
+                            {
+                                i++;
+                                ul.append( $( this ).clone( true ));
+                            });
                     
                     /* Creating the viewport and buttons
                      */
@@ -133,7 +118,7 @@
                     
                     var width = li.first().width();
                     viewPort.width( width );
-                    ul.width( width * li.length );
+                    ul.width( width * $( '> li', ul ).length );
                     
                     /* Setting positions so we start from the beginning but
                      * still have two element behind us.
@@ -209,7 +194,7 @@
                             
                             var left = ul.position().left + width;
 
-                            // Moves first first block to the end
+                            // Moves first block to the end
                             ul.append( $( '> li', ul ).first() );
                             ul.css( 'left', left + 'px' );
 
