@@ -23,7 +23,7 @@
     /* Throws 3 exceptions:
      * - No ul element found
      * - More then 1 ul element found
-     * - Too few li elements
+     * - No li elements found
      */
     $.fn.circusSlider = function()
     {
@@ -84,8 +84,37 @@
                     if( ul.length > 1 )
                         throw 'More then 1 ul element found';
 
+                    if( li.length < 1 )
+                        throw 'No li elements found';
+                    
+                    /* Cloning elements
+                     * We need 5 li element for a nice flow and a good looking
+                     * floded view.
+                     */
+                    
                     if( li.length < 5 )
-                        throw 'Too few li elements';
+                    {
+                        var n;
+                        
+                        if( li.length == 1 )
+                            n = 5
+                        
+                        if( li.length == 2 )
+                            n = 3
+                        
+                        if( li.length == 3 || li.length == 4 )
+                            n = 1
+                            
+                        for( var i = 0; i < n; i++ )
+                            li.each(
+                                function()
+                                {
+                                    ul.append( $( this ).clone( true ));
+                                });
+                        
+                        // Re collecting li elements
+                        li = $( '> li', ul );
+                    }
                     
                     /* Creating the viewport and buttons
                      */
@@ -106,8 +135,12 @@
                     viewPort.width( width );
                     ul.width( width * li.length );
                     
-                    /* Setting positions
+                    /* Setting positions so we start from the beginning but
+                     * still have two element behind us.
                      */
+                    
+                    for( var i = 0; i < 2; i++ )
+                        ul.prepend( $( '> li', ul ).last() );
                     
                     ul.css( 'left', '-' + ( width * 2 ) + 'px' );
                             
@@ -139,7 +172,7 @@
                             var left = ul.position().left - width;
 
                             // Moves the endblock up front
-                            ul.prepend( $( 'li', ul ).last() );
+                            ul.prepend( $( '> li', ul ).last() );
                             ul.css( 'left', left + 'px' );
 
                             // Starts the animation
@@ -165,7 +198,8 @@
                         });
                         
                     rightButton.click(
-                        // See eventlistenr for left button for documentation
+                    
+                        // For documentation, see above eventlistener
                         function()
                         {
                             if( ani )
@@ -175,7 +209,8 @@
                             
                             var left = ul.position().left + width;
 
-                            ul.append( $( 'li', ul ).first() );
+                            // Moves first first block to the end
+                            ul.append( $( '> li', ul ).first() );
                             ul.css( 'left', left + 'px' );
 
                             var i       = 0,
