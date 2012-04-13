@@ -35,8 +35,12 @@
         
         options = $.extend(
             {
-                // Determines if the buttons should be shown
+                // Determines if the buttons should be displayed
                 'showButtons':
+                    false,
+                
+                // Determines if thumbnails should be displayed
+                'showThumbnails':
                     false
             },
             options );
@@ -148,6 +152,11 @@
 
                     var ani = false;
                     
+                    /* Determines what view we are currently viewing
+                     */
+                    
+                    var viewIndex = 0;
+                    
                     /* Defines the animation function that slides the slider
                      */
                         
@@ -160,6 +169,16 @@
 
                         // Prevents other animations from starting
                         ani = true;
+                        
+                        // Calculating the new viewIndex
+                        var liLength = $( '> li', ul ).length;
+                        viewIndex += slide;
+                        
+                        // Keeping the view index relevent
+                        while( viewIndex >= liLength )
+                            viewIndex -= liLength;
+                        while( viewIndex < 0 )
+                            viewIndex = liLength + viewIndex;
                         
                         var // Calculating the animation length
                             length = width * Math.abs( slide ),
@@ -241,6 +260,54 @@
                         ul.parent()
                             .append( leftButton )
                             .append( rightButton );
+                    }
+                    
+                    if( options.showThumbnails )
+                    {
+                        /* Creating the thumbnail container
+                         */
+                        
+                        var thumbnailContainer = $( '<div />' )
+                                .addClass(
+                                    'circus-slider-thumbnail-container' );
+                        
+                        /* Adding the thumbnails to the container
+                         */
+                        
+                        for( var i = 0, l = $( '> li', ul ).length; i < l; i++ )
+                            thumbnailContainer.
+                                append(
+                                    $( '<div />' )
+                                        .addClass(
+                                            'circus-slider-thumbnail' )
+                                        
+                                        // Setting the thumbnail index
+                                        .attr( 'data-thumbnail', i )
+                                        
+                                        // Setting the event listener
+                                        .click(
+                                            function()
+                                            {
+                                                // Calculating a relevent path
+                                                var go = $( this ).attr(
+                                                            'data-thumbnail' )
+                                                       - viewIndex;
+                                                
+                                                // Calculating closest path
+                                                if( Math.abs( go ) > l / 2 )
+                                                    go = go > 0
+                                                       ? go - l
+                                                       : l  + go;
+                                                
+                                                // Starts the animation
+                                                slide( go );
+                                            }));
+                        
+                        /* Adding the thumbnail container
+                         */
+                        
+                        ul.parent()
+                            .append( thumbnailContainer );
                     }
                 });
         
