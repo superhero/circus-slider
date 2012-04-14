@@ -17,46 +17,73 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
  */
+ 
+ .circus-slider .circus-slider-left-button,
+.circus-slider .circus-slider-right-button
+{
+    width:
+        20px;
 
-.circus-slider
+    height:
+        100%;
+
+    position:
+        absolute;
+
+    cursor:
+        pointer;
+
+    background:
+        #000;
+}
+
+.circus-slider .circus-slider-left-button
+{
+    left:
+        0;
+}
+
+.circus-slider .circus-slider-right-button
+{
+    right:
+        0;
+}
+
+.circus-slider-thumbnail-container
 {
     overflow:
         hidden;
 }
 
-.circus-slider .circus-slider-viewport
-{
-    margin:
-        0
-        auto;
-
-    position:
-        relative;
-
-    height:
-        100%;
-}
-
-.circus-slider ul
+.circus-slider .circus-slider-thumbnail-container
 {
     position:
         absolute;
-
-    margin:
-        0;
-
-    padding:
-        0;
-
-    list-style:
-        none;
+    
+    bottom:
+        10px;
+    
+    right:
+        20px;
 }
 
-.circus-slider li
+.circus-slider-thumbnail-container .circus-slider-thumbnail
 {
+    width:
+        20px;
+
+    height:
+        20px;
+    
+    background:
+        #000;
+    
     float:
         left;
-
-    list-style:
-        none;
+    
+    margin-right:
+        10px;
+    
+    cursor:
+        pointer;
 }
