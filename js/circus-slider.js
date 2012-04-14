@@ -24,9 +24,12 @@
      * - No ul element found
      * - More then 1 ul element found
      * - No li elements found
+     * - Unrecognized type of options.thumbnailsWrapper
      * 
-     * Has the following options:
-     * - showButtons
+     * Following options are available:
+     * - showButtons [boolean]
+     * - showThumbnails [boolean]
+     * - thumbnailsWrapper [selector]
      */
     $.fn.circusSlider = function( options )
     {
@@ -41,7 +44,13 @@
                 
                 // Determines if thumbnails should be displayed
                 'showThumbnails':
-                    false
+                    false,
+                
+                // Allows the user to specify a wrapper that containes the
+                // thumbnail container
+                // ..defaults to viewport
+                'thumbnailsWrapper':
+                    undefined
             },
             options );
         
@@ -303,11 +312,31 @@
                                                 slide( go );
                                             }));
                         
-                        /* Adding the thumbnail container
+                        /* Adding the thumbnail container to its wrapper
                          */
                         
-                        ul.parent()
-                            .append( thumbnailContainer );
+                        var wrapper;
+                        
+                        switch( typeof options.thumbnailsWrapper )
+                        {
+                            case 'string':
+                                wrapper = $( options.thumbnailsWrapper );
+                                break;
+                                
+                            case 'object':
+                                wrapper = options.thumbnailsWrapper;
+                                break;
+                            
+                            case 'undefined':
+                                wrapper = ul.parent();
+                                break;
+                                    
+                            default:
+                                throw 'Unrecognized type of '
+                                    + 'options.thumbnailsWrapper';
+                        }
+                        
+                        wrapper.append( thumbnailContainer );
                     }
                 });
         
