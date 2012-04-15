@@ -1,6 +1,6 @@
 /*
     Circus Slider - jQuery plugin - Image slider 
-    Copyright (C) 2011  Erik Landvall
+    Copyright (C) 2012  Erik Landvall
     
     This file is part of Circus Slider.
 
