@@ -27,6 +27,7 @@
      * - Unrecognized type of options.thumbnailsWrapper
      * 
      * Following options are available:
+     * - eventCash [boolean]
      * - showButtons [boolean]
      * - showThumbnails [boolean]
      * - thumbnailsWrapper [selector]
@@ -38,6 +39,10 @@
         
         options = $.extend(
             {
+                // Cashes events
+                'eventCash':
+                    true,
+                
                 // Determines if the buttons should be displayed
                 'showButtons':
                     false,
@@ -166,22 +171,35 @@
                     
                     var viewIndex = 0;
                     
+                    /* Cashes event if animation is currently running.
+                     */
+                    
+                    var eventCash = null;
+                    
                     /* Defines the animation function that slides the slider
                      */
                         
-                    var slide = function( slide )
+                    var slide = function( tick )
                     {
                         // Prevents this animation from starting if there's
                         // already an animation running
                         if( ani )
+                        {
+                            // Cashed event will run after current animation
+                            // has finished
+                            eventCash = tick;
                             return;
+                        }
 
                         // Prevents other animations from starting
                         ani = true;
                         
+                        // Resets eventual cash
+                        eventCash = null;
+                        
                         // Calculating the new viewIndex
                         var liLength = $( '> li', ul ).length;
-                        viewIndex += slide;
+                        viewIndex += tick;
                         
                         // Keeping the view index relevent
                         while( viewIndex >= liLength )
@@ -190,10 +208,10 @@
                             viewIndex = liLength + viewIndex;
                         
                         var // Calculating the animation length
-                            length = width * Math.abs( slide ),
+                            length = width * Math.abs( tick ),
                         
                             // Calculating new position value
-                            left = slide < 0
+                            left = tick < 0
                                  ? ul.position().left - length
                                  : ul.position().left,
                             
@@ -201,8 +219,8 @@
                             animation = halfMoonAnimation( length );
 
                         // Clones the endblocks and prepands it or vice versa
-                        for( var n = 0; n < Math.abs( slide ); n++ )
-                            slide < 0
+                        for( var n = 0; n < Math.abs( tick ); n++ )
+                            tick < 0
                                 ? ul.prepend(
                                     $( 'li:nth(' + ( liLength - 1 ) + ')', ul )
                                         .clone() )
@@ -235,8 +253,8 @@
                                     clearInterval( id );
                                     
                                     // Removing flooded elements
-                                    for( var n = 0; n < Math.abs( slide ); n++ )
-                                        slide < 0
+                                    for( var n = 0; n < Math.abs( tick ); n++ )
+                                        tick < 0
                                             ? $( '> li', ul ).last().remove()
                                             : $( '> li', ul ).first().remove();
                                     
@@ -244,7 +262,7 @@
                                         {
                                             // Positioning content
                                             'left':
-                                                ( slide < 0
+                                                ( tick < 0
                                                 ? ul.position().left
                                                 : ul.position().left 
                                                 + length ) + 'px',
@@ -257,13 +275,19 @@
                                         });
 
                                     ani = false;
+                                    
+                                    // Running cashed event
+                                    if( options.eventCash )
+                                        if( eventCash != null )
+                                            slide( eventCash );
+                                    
                                     return;
                                 }
 
                                 // Sets the new position value
                                 ul.css(
                                     'left',
-                                    ( slide < 0
+                                    ( tick < 0
                                     ? left + animation[ i++ ]
                                     : left - animation[ i++ ] )
                                     + 'px' );
