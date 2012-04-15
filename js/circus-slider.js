@@ -195,19 +195,33 @@
                             // Calculating new position value
                             left = slide < 0
                                  ? ul.position().left - length
-                                 : ul.position().left + length,
+                                 : ul.position().left,
                             
                             // Retrives the animation array
                             animation = halfMoonAnimation( length );
 
-                        // Moves the endblock up front or vice versa
+                        // Clones the endblocks and prepands it or vice versa
                         for( var n = 0; n < Math.abs( slide ); n++ )
                             slide < 0
-                                ? ul.prepend( $( '> li', ul ).last() )
-                                : ul.append( $( '> li', ul ).first() );
-                            
-                        // Positioning the content accordingly
-                        ul.css( 'left', left + 'px' );
+                                ? ul.prepend(
+                                    $( 'li:nth(' + ( liLength - 1 ) + ')', ul )
+                                        .clone() )
+                                        
+                                : ul.append(
+                                    $( 'li:nth(' + n + ')', ul )
+                                        .clone() );
+
+                        ul.css(
+                            {
+                                // Positioning the content accordingly
+                                'left':
+                                    left + 'px',
+                                
+                                // Setting new size to be able to display
+                                // cloned elements
+                                'width':
+                                    ( ul.width() + length ) + 'px'
+                            });
 
                         // Starts the animation
                         var i  = 0,
@@ -219,6 +233,29 @@
                                 if( i == l )
                                 {
                                     clearInterval( id );
+                                    
+                                    // Removing flooded elements
+                                    for( var n = 0; n < Math.abs( slide ); n++ )
+                                        slide < 0
+                                            ? $( '> li', ul ).last().remove()
+                                            : $( '> li', ul ).first().remove();
+                                    
+                                    ul.css(
+                                        {
+                                            // Positioning content
+                                            'left':
+                                                ( slide < 0
+                                                ? ul.position().left
+                                                : ul.position().left 
+                                                + length ) + 'px',
+                                            
+                                            // Setting new size after the
+                                            // dublicates has been removed
+                                            'width':
+                                                ( ul.width() 
+                                                - length ) + 'px'
+                                        });
+
                                     ani = false;
                                     return;
                                 }
@@ -234,7 +271,7 @@
                             20 );
                     }
                     
-                    /* Adding the buttons if so desired by the user
+                    /* Adding the buttons if specifyed in options
                      */
                     
                     if( options.showButtons )
@@ -270,6 +307,9 @@
                             .append( leftButton )
                             .append( rightButton );
                     }
+                    
+                    /* Adding the thumbnails if specifyed in options
+                     */
                     
                     if( options.showThumbnails )
                     {
