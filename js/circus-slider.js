@@ -24,7 +24,6 @@
      * - No ul element found
      * - More then 1 ul element found
      * - No li elements found
-     * - Unrecognized type of options.thumbnailsWrapper
      * 
      * Following options are available:
      * - eventCash [boolean]
@@ -188,6 +187,7 @@
                             // Cashed event will run after current animation
                             // has finished
                             eventCash = tick;
+                            
                             return;
                         }
 
@@ -198,14 +198,29 @@
                         eventCash = null;
                         
                         // Calculating the new viewIndex
-                        var liLength = $( '> li', ul ).length;
                         viewIndex += tick;
                         
                         // Keeping the view index relevent
+                        var liLength = $( '> li', ul ).length;
                         while( viewIndex >= liLength )
                             viewIndex -= liLength;
                         while( viewIndex < 0 )
                             viewIndex = liLength + viewIndex;
+                        
+                        // Setting active class name on correct thumbnail
+                        if( options.showThumbnails )
+                        {
+                            var activeClass = 'circus-slider-thumbnail-active',
+                                thumbnailContainer = $(
+                                    '> .circus-slider-thumbnail-container',
+                                    thumbnailsWrapper );
+                            
+                            $( '> .circus-slider-thumbnail',
+                                thumbnailContainer ).removeClass( activeClass );
+                                
+                            $( '> .circus-slider-thumbnail:nth('+viewIndex+')',
+                                thumbnailContainer ).addClass( activeClass );
+                        }
                         
                         var // Calculating the animation length
                             length = width * Math.abs( tick ),
@@ -375,32 +390,35 @@
                                                 // Starts the animation
                                                 slide( go );
                                             }));
+                                            
+                        /* Setting classname for active thumbnail
+                         */
+                        
+                        $( '> .circus-slider-thumbnail:first-child',
+                            thumbnailContainer )
+                            .addClass( 'circus-slider-thumbnail-active' );
                         
                         /* Adding the thumbnail container to its wrapper
                          */
                         
-                        var wrapper;
+                        var thumbnailsWrapper;
                         
                         switch( typeof options.thumbnailsWrapper )
                         {
                             case 'string':
-                                wrapper = $( options.thumbnailsWrapper );
+                                thumbnailsWrapper = $( options.thumbnailsWrapper );
                                 break;
                                 
                             case 'object':
-                                wrapper = options.thumbnailsWrapper;
+                                thumbnailsWrapper = options.thumbnailsWrapper;
                                 break;
                             
                             case 'undefined':
-                                wrapper = ul.parent();
+                                thumbnailsWrapper = ul.parent();
                                 break;
-                                    
-                            default:
-                                throw 'Unrecognized type of '
-                                    + 'options.thumbnailsWrapper';
                         }
                         
-                        wrapper.append( thumbnailContainer );
+                        thumbnailsWrapper.append( thumbnailContainer );
                     }
                 });
         

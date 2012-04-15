@@ -18,7 +18,7 @@
     along with this program.  If not, see http://www.gnu.org/licenses/.
  */
  
- .circus-slider .circus-slider-left-button,
+.circus-slider .circus-slider-left-button,
 .circus-slider .circus-slider-right-button
 {
     width:
@@ -67,7 +67,7 @@
         20px;
 }
 
-.circus-slider-thumbnail-container .circus-slider-thumbnail
+.circus-slider-thumbnail
 {
     width:
         20px;
@@ -86,4 +86,10 @@
     
     cursor:
         pointer;
+}
+
+.circus-slider-thumbnail.circus-slider-thumbnail-active
+{
+    background:
+        #ccc;
 }
