@@ -129,7 +129,7 @@
                             function()
                             {
                                 i++;
-                                ul.append( $( this ).clone( true ));
+                                ul.append( $( this ).clone( true, true ));
                             });
                     
                     /* Creating the viewport
@@ -238,11 +238,11 @@
                             tick < 0
                                 ? ul.prepend(
                                     $( 'li:nth(' + ( liLength - 1 ) + ')', ul )
-                                        .clone() )
+                                        .clone( true, true ) )
                                         
                                 : ul.append(
                                     $( 'li:nth(' + n + ')', ul )
-                                        .clone() );
+                                        .clone( true, true ) );
 
                         ul.css(
                             {
