@@ -118,13 +118,20 @@
                     if( li.length < 1 )
                         throw 'No li elements found';
                     
+                    /* How many li elements exists in the initiation part.
+                     * This tells us how many images acctuly existes after
+                     * cloning has accured.
+                     */
+                    
+                    var iniLiLength = li.length;
+                    
                     /* Cloning elements
                      * 
                      * We need 5 li element for a nice flow and a good looking
                      * floded view.
                      */
                     
-                    for( var i = li.length; i < 5; )
+                    for( var i = iniLiLength; i < 5; )
                         li.each(
                             function()
                             {
@@ -201,11 +208,10 @@
                         viewIndex += tick;
                         
                         // Keeping the view index relevent
-                        var liLength = $( '> li', ul ).length;
-                        while( viewIndex >= liLength )
-                            viewIndex -= liLength;
+                        while( viewIndex >= iniLiLength )
+                            viewIndex -= iniLiLength;
                         while( viewIndex < 0 )
-                            viewIndex = liLength + viewIndex;
+                            viewIndex = iniLiLength + viewIndex;
                         
                         // Setting active class name on correct thumbnail
                         if( options.showThumbnails )
@@ -237,7 +243,7 @@
                         for( var n = 0; n < Math.abs( tick ); n++ )
                             tick < 0
                                 ? ul.prepend(
-                                    $( 'li:nth(' + ( liLength - 1 ) + ')', ul )
+                                    $( 'li:nth(' + ( iniLiLength - 1 ) + ')', ul )
                                         .clone( true, true ) )
                                         
                                 : ul.append(
@@ -362,7 +368,7 @@
                         /* Adding the thumbnails to the container
                          */
                         
-                        for( var i = 0, l = $( '> li', ul ).length; i < l; i++ )
+                        for( var i = 0, l = iniLiLength; i < l; i++ )
                             thumbnailContainer.
                                 append(
                                     $( '<div />' )
