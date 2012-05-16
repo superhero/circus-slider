@@ -60,3 +60,10 @@
     list-style:
         none;
 }
+
+
+.circus-slider-thumbnail
+{
+    overflow:
+        hidden;
+}

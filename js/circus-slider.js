@@ -38,16 +38,23 @@
         
         options = $.extend(
             {
-                // Cashes events
+                // Cashes browsing events
                 'eventCash':
                     true,
                 
-                // Determines if the buttons should be displayed
+                // Determines if the buttons for left or right scrolling should
+                // be displayed
                 'showButtons':
                     false,
                 
                 // Determines if thumbnails should be displayed
                 'showThumbnails':
+                    false,
+                
+                // If this option and 'showThumbnails' is both true, this
+                // option will use the first appering image in the li element
+                // as a representing thumbnail for that slide.
+                'useImagesForThumbnails':
                     false,
                 
                 // Allows the user to specify a wrapper that containes the
@@ -243,12 +250,14 @@
                         for( var n = 0; n < Math.abs( tick ); n++ )
                             tick < 0
                                 ? ul.prepend(
-                                    $( 'li:nth(' + ( iniLiLength - 1 ) + ')', ul )
-                                        .clone( true, true ) )
-                                        
+                                    $( 'li:nth(' + ( iniLiLength - 1 ) + ')', 
+                                        ul )
+                                    .clone( true, true ))
+
                                 : ul.append(
-                                    $( 'li:nth(' + n + ')', ul )
-                                        .clone( true, true ) );
+                                    $( 'li:nth(' + n + ')', 
+                                        ul )
+                                    .clone( true, true ));
 
                         ul.css(
                             {
@@ -425,6 +434,102 @@
                         }
                         
                         thumbnailsWrapper.append( thumbnailContainer );
+                        
+                        /* Setting images as thumbnails if desired by the user,
+                         * using first appering image
+                         */
+                        
+                        if( options.useImagesForThumbnails )
+                        {
+                            var i = 0;
+                            
+                            // Setting relative pointers
+                            thumbnailContainer = $(
+                                '> .circus-slider-thumbnail-container', 
+                                thumbnailsWrapper );
+                            
+                            // Looping through every thumbnail
+                            $( '> div', thumbnailContainer ).each(
+                                function()
+                                {
+                                    // The first image in the sliding position
+                                    // will be represented as the thumbnail
+                                    var img = $( 'img:first', li[ i++ ] );
+                                    
+                                    // Will not set any thumbnail if no image
+                                    // is found
+                                    if( img.length == 1 )
+                                    {
+                                        // Creating a new object so that we
+                                        // have a relative scope for every
+                                        // thumbnail.
+                                        new (function( _this, src, w, h )
+                                        {
+                                            var img    = new Image();
+                                            
+                                            // Doing the magic onece the image
+                                            // is done loading
+                                            img.onload = function()
+                                            {
+                                                // Setting the thumbnail sizes
+                                                // with some offset value
+                                                var width  = w * 1.2,
+                                                    height = h * 1.2;
+
+                                                // Calculating the proportions
+                                                if( this.width > this.height )
+                                                    width = Math.round( 
+                                                        width *
+                                                        ( this.width
+                                                        / this.height ));
+
+                                                else
+                                                    height = Math.round( 
+                                                        height *
+                                                        ( this.height
+                                                        / this.width ));
+                                                
+                                                // Calculating the offset values
+                                                var left = Math.round(
+                                                         ( width  - w ) 
+                                                         / 2 ),
+                                                     
+                                                    top  = Math.round(
+                                                         ( height - h ) 
+                                                         / 2 );
+                                                
+                                                // Setting the propertys
+                                                img = $( img ).css(
+                                                    {
+                                                        'height':
+                                                            height + 'px',
+                                                        
+                                                        'width':
+                                                            width + 'px',
+                                                        
+                                                        'margin-top':
+                                                            '-' + top + 'px',
+                                                        
+                                                        'margin-left':
+                                                            '-' + left + 'px'
+                                                    });
+                                                
+                                                // Adding the thumbnail to its
+                                                // container
+                                                $( _this ).append( img );
+                                            }
+                                            
+                                            // Setting the image source after
+                                            // we sat the onload event handler
+                                            img.src = src;
+                                            
+                                        })( this,
+                                            img.attr( 'src' ),
+                                            $( this ).width(),
+                                            $( this ).height() );
+                                    }
+                                });
+                        }
                     }
                 });
         
