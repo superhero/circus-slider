@@ -29,6 +29,7 @@
      * - eventCash [boolean]
      * - showButtons [boolean]
      * - showThumbnails [boolean]
+     * - useImagesForThumbnails [boolean]
      * - thumbnailsWrapper [selector]
      */
     $.fn.circusSlider = function( options )
