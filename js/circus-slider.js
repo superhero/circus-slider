@@ -16,6 +16,15 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see http://www.gnu.org/licenses/.
+
+    - - -
+
+    Includes animator.js:
+
+        Animator - Javascript
+        Copyright (C) 2012  Erik Landvall
+        Dual licensed under the MIT and GPL version 3 licenses
+
  */
 
 ( function( $ )
@@ -62,14 +71,255 @@
                 // thumbnail container
                 // ..defaults to viewport
                 'thumbnailsWrapper':
+                    undefined,
+                
+                // Allows the user provide the Animator instance if desired
+                // .. desfults to a new instance of the Animator class
+                'animator':
                     undefined
             },
             options );
+            
+        /**
+         * Animator is a class ment to create smother animations when possible
+         * 
+         * @link http://webstuff.nfshost.com/anim-timing/Overview.html
+         * @link https://developer.mozilla.org/en/DOM/window.requestAnimationFrame
+         * @link http://dev.chromium.org/developers/design-documents/requestanimationframe-implementation
+         */
+        var Animator = function()
+        {
+            var
+
+            // A handler to this instance
+            _animator = this,
+
+            // A spcifed element for better optimatation. Usuly the canvas where we are
+            // painting
+            _element = undefined,
+
+            // The queue
+            _queue    = [],
+
+            // A flag that determines if the loop is running
+            _running  = false,
+
+           /**
+            * Handle to the callback-routine
+            */
+            _requestAnimationFrame = ( function()
+            {
+                return window.requestAnimationFrame
+                    || window.webkitRequestAnimationFrame
+                    || window.mozRequestAnimationFrame
+                    || window.oRequestAnimationFrame
+                    || window.msRequestAnimationFrame
+
+                    // Fallback
+                    || function( callback )
+                    {return window.setTimeout( callback, 1000 / 60 );};
+            })();
+
+           /**
+            * Starts the animation loop, if not already running
+            * 
+            * @type void
+            */
+            this.start = function()
+            {
+                if( !_running )
+                {
+                    _running = true;
+
+                    ( function loop()
+                    {
+                        if( _running )
+                        {
+                            _requestAnimationFrame(
+                                loop,
+                                _animator.getElement() );
+
+                            var queue = _animator.getQueue();
+
+                            for( var i = 0, l = queue.length; i < l; i++ )
+                                queue[ i ]();
+                        }
+                    })();
+                }
+
+                return _animator;
+            }
+
+           /**
+            * Stops/Pauses the animation loop, if running...
+            * 
+            * @type void
+            */
+            this.stop = function()
+            {
+                _running = false;
+
+                return _animator;
+            }
+
+           /**
+            * Returns if animation loop is currently running
+            * 
+            * @type boolean
+            */
+            this.isRunning = function()
+            {
+                return _running;
+            }
+
+           /**
+            * Adds one ore many functions to the queue
+            * 
+            * @param fn array|function - The function, or an array of functions,
+            * we wish to add to the queue
+            * @exception 'Only functions are allowed in the queue'
+            * @type void
+            */
+            this.addToQueue = function( fn )
+            {
+                switch( typeof fn )
+                {
+                    case 'function':
+                        _queue.push( fn );
+                        break;
+
+                    case 'object':
+                        if( fn instanceof Array )
+                        {
+                            for( var i = 0, l = fn.length; i < l; i++ )
+                                _animator.addToQueue( fn[ i ] );
+
+                            break;
+                        }
+
+                    default :
+                        throw 'Only functions are allowed in the queue';
+                }
+
+                return _animator;
+            }
+
+           /**
+            * Removes a function from the queue
+            * 
+            * @param fn function - The function we wish to remove from the queue
+            * @type void
+            */
+            this.removeFromQueue = function( fn )
+            {
+                for( var i = 0; i < _queue.length; i++ )
+                    if( _queue[ i ] == fn )
+                        _animator.removeIndexFromQueue( i-- );
+
+                return _animator;
+            }
+
+           /**
+            * Removes an item from the queue depending on specified index
+            * 
+            * @param index integer - The index we wish to remove
+            * @type void
+            */
+            this.removeIndexFromQueue = function( index )
+            {
+                _queue.splice( Math.floor( index ), 1 );
+
+                return _animator;
+            }
+
+           /**
+            * Returns the current queue
+            * 
+            * @type array
+            */
+            this.getQueue = function()
+            {
+                return _queue;
+            }
+
+           /**
+            * Clears the old queue and sets a new one
+            * 
+            * @exception 'Only functions are allowed in the queue'
+            * @param queue array - The queue new queue
+            * @type void
+            */
+            this.setQueue = function( queue )
+            {
+                _animator.clearQueue();
+                _animator.addToQueue( queue );
+
+                return _animator;
+            }
+
+           /**
+            * Unsets the queue
+            * 
+            * @type void
+            */
+            this.clearQueue = function()
+            {
+                _queue = [];
+
+                return _animator;
+            }
+
+           /**
+            * Returns the specified element we wish to render on
+            *
+            * @type Element
+            */
+            this.getElement = function()
+            {
+                return _element;
+            }
+
+           /**
+            * Not required. If specifyed one may optimize the animation
+            *
+            * @param element Element - [optional] The element we render in
+            * @exception 'Unrecognized element'
+            * @type void
+            */
+            this.setElement = function( element )
+            {
+                if( element == undefined )
+                    _animator.removeElement();
+
+                else if( element instanceof Element )
+                    _element = element;
+
+                else if( element instanceof jQuery )
+                    _element = element.get( 0 );
+
+                else
+                    throw 'Unrecognized element';
+
+                return _animator;
+            }
+
+           /**
+            * Removes the specified Element we render in
+            * 
+            * @type void
+            */
+            this.removeElement = function()
+            {
+                _element = undefined;
+
+                return _animator;
+            }
+        },
         
         /* The function that calculates the animation movement
          */
         
-        var halfMoonAnimation = function( distance, speed )
+        halfMoonAnimation = function( distance, speed )
         {
             speed = speed || 0.1;
 
@@ -95,7 +345,14 @@
                 animation[ animation.length - 1 ] = distance;
 
             return animation;
-        };
+        },
+        
+        /* Animator is used for smother animations
+         */
+
+        animator = options.animator instanceof Animator
+                    ? options.animator
+                    : new Animator();
         
         /* Looping through all elements we wish to create a slider from
          */
@@ -188,13 +445,7 @@
                     /* Cashes event if animation is currently running.
                      */
                     
-                    eventCash = null,
-                    
-                    /* Animator is used for smother animations
-                     */
-                    
-                    animator = new Animator();
-                    animator.start();
+                    eventCash = null;
                     
                     /* Defines the animation function that slides the slider
                      */
@@ -329,7 +580,7 @@
                                     + 'px' );
                             };
                             
-                        animator.addToQueue( loop );
+                        animator.addToQueue( loop ).start();
                     }
                     
                     /* Adding the buttons if specifyed in options
@@ -341,10 +592,17 @@
                          */
                         
                         var leftButton = $( '<div />' )
-                                .addClass( 'circus-slider-left-button' ),
+                                .addClass( 'circus-slider-left-button' )
+                                
+                                /* Appending an empty element on the button
+                                 * that could be used for styling with CSS.
+                                 * ..it has no other purpose
+                                 */
+                                .append( $( '<div />' )),
                             
                             rightButton = $( '<div />' )
-                                .addClass( 'circus-slider-right-button' );
+                                .addClass( 'circus-slider-right-button' )
+                                .append( $( '<div />' ));
                                 
                         /* Setting event listeners for the buttons
                          */
@@ -542,195 +800,4 @@
         
         return this;
     }
-    
-   /**
-    * Animator is a class ment to create smother animations when possible
-    * 
-    * Animator - Javascript
-    * Copyright (C) 2012  Erik Landvall
-    * Dual licensed under the MIT and GPL version 3 licenses
-    * 
-    * @link http://webstuff.nfshost.com/anim-timing/Overview.html
-    * @link https://developer.mozilla.org/en/DOM/window.requestAnimationFrame
-    * @link http://dev.chromium.org/developers/design-documents/requestanimationframe-implementation
-    */
-    var Animator = function()
-    {
-        var
-
-        // A handler to this instance
-        _animator = this,
-
-        // The queue
-        _queue    = [],
-
-        // The id to the running loop
-        _id       = undefined,
-
-        // A flag that determines if the loop is running
-        _running  = false,
-
-        /**
-        * Handle to the callback-routine
-        */
-        _requestAnimationFrame = (function()
-        {
-            return window.requestAnimationFrame
-                || window.webkitRequestAnimationFrame
-                || window.mozRequestAnimationFrame
-                || window.oRequestAnimationFrame
-                || window.msRequestAnimationFrame;
-        })(),
-
-        /**
-        * Handle to the cancel part of the callback-routine
-        */
-        _cancelAnimationFrame = (function()
-        {
-            return window.cancelAnimationFrame
-                || window.webkitCancelAnimationFrame
-                || window.webkitCancelRequestAnimationFrame
-                || window.mozCancelRequestAnimationFrame
-                || window.oCancelRequestAnimationFrame
-                || window.msCancelRequestAnimationFrame;
-        })();
-
-        // Fallback
-        if( !_requestAnimationFrame || !_cancelAnimationFrame )
-        {
-            _requestAnimationFrame = function( callback )
-            {
-                return window.setTimeout( callback, 1000 / 60 );
-            }
-
-            _cancelAnimationFrame = function( id )
-            {
-                window.clearTimeout( id );
-            }
-        }
-
-        /**
-        * Starts the animation loop, if not already running
-        * 
-        * @type void
-        */
-        this.start = function()
-        {
-            if( !_running )
-            {
-                _running = true;
-
-                (function loop(){
-                    _id = _requestAnimationFrame( loop );
-
-                    var queue = _animator.getQueue();
-
-                    for( var i = 0, l = queue.length; i < l; i++ )
-                        queue[ i ]();
-                })();
-            }
-        }
-
-        /**
-        * Stops/Pauses the animation loop, if running...
-        * 
-        * @type void
-        */
-        this.stop = function()
-        {
-            if( _running )
-            {
-                _cancelAnimationFrame( _id );
-                _id      = undefined;
-                _running = false;
-            }
-        }
-
-        /**
-        * Adds one ore many functions to the queue
-        * 
-        * @param func array|function - The function, or an array of functions, we
-        * wish to add to the queue
-        * @exception Only functions are allowed in the queue
-        * @type void
-        */
-        this.addToQueue = function( func )
-        {
-            switch( typeof func )
-            {
-                case 'function':
-                    _queue.push( func );
-                    break;
-
-                case 'object':
-                    if( func instanceof Array )
-                    {
-                        for( var i = 0, l = func.length; i < l; i++ )
-                            _animator.addToQueue( func[ i ] );
-
-                        break;
-                    }
-
-                default :
-                    throw 'Only functions are allowed in the queue';
-            }
-        }
-
-        /**
-        * Removes a function from the queue
-        * 
-        * @param func function - The function we wish to remove from the queue
-        * @type void
-        */
-        this.removeFromQueue = function( func )
-        {
-            for( var i = 0; i < _queue.length; i++ )
-                if( _queue[ i ] == func )
-                    _animator.removeIndexFromQueue( i-- );
-        }
-
-        /**
-        * Removes an item from the queue depending on specified index
-        * 
-        * @param index integer - The index we wish to remove
-        * @type void
-        */
-        this.removeIndexFromQueue = function( index )
-        {
-            _queue.splice( Math.floor( index ), 1 );
-        }
-
-        /**
-        * Returns the current queue
-        * 
-        * @type array
-        */
-        this.getQueue = function()
-        {
-            return _queue;
-        }
-
-        /**
-        * Clears the old queue and sets a new one
-        * 
-        * @exception Only functions are allowed in the queue
-        * @param queue array - The queue new queue
-        * @type void
-        */
-        this.setQueue = function( queue )
-        {
-            _animator.clearQueue();
-            _animator.addToQueue( queue );
-        }
-
-        /**
-        * Unsets the queue
-        * 
-        * @type void
-        */
-        this.clearQueue = function()
-        {
-            _queue = [];
-        }
-    };
 })( jQuery );
