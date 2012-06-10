@@ -43,43 +43,6 @@
      */
     $.fn.circusSlider = function( options )
     {
-        /* Updating the default options with user defined
-         */
-        
-        options = $.extend(
-            {
-                // Cashes browsing events
-                'eventCash':
-                    true,
-                
-                // Determines if the buttons for left or right scrolling should
-                // be displayed
-                'showButtons':
-                    false,
-                
-                // Determines if thumbnails should be displayed
-                'showThumbnails':
-                    false,
-                
-                // If this option and 'showThumbnails' is both true, this
-                // option will use the first appering image in the li element
-                // as a representing thumbnail for that slide.
-                'useImagesForThumbnails':
-                    false,
-                
-                // Allows the user to specify a wrapper that containes the
-                // thumbnail container
-                // ..defaults to viewport
-                'thumbnailsWrapper':
-                    undefined,
-                
-                // Allows the user provide the Animator instance if desired
-                // .. desfults to a new instance of the Animator class
-                'animator':
-                    undefined
-            },
-            options );
-            
         /**
          * Animator is a class ment to create smother animations when possible
          * 
@@ -94,8 +57,8 @@
             // A handler to this instance
             _animator = this,
 
-            // A spcifed element for better optimatation. Usuly the canvas where we are
-            // painting
+            // A spcifed element for better optimatation. Usuly the canvas where
+            // we are painting
             _element = undefined,
 
             // The queue
@@ -104,7 +67,7 @@
             // A flag that determines if the loop is running
             _running  = false,
 
-           /**
+            /**
             * Handle to the callback-routine
             */
             _requestAnimationFrame = ( function()
@@ -120,10 +83,10 @@
                     {return window.setTimeout( callback, 1000 / 60 );};
             })();
 
-           /**
+            /**
             * Starts the animation loop, if not already running
             * 
-            * @type void
+            * @type Animator
             */
             this.start = function()
             {
@@ -150,10 +113,10 @@
                 return _animator;
             }
 
-           /**
+            /**
             * Stops/Pauses the animation loop, if running...
             * 
-            * @type void
+            * @type Animator
             */
             this.stop = function()
             {
@@ -162,7 +125,7 @@
                 return _animator;
             }
 
-           /**
+            /**
             * Returns if animation loop is currently running
             * 
             * @type boolean
@@ -172,27 +135,33 @@
                 return _running;
             }
 
-           /**
+            /**
             * Adds one ore many functions to the queue
             * 
             * @param fn array|function - The function, or an array of functions,
             * we wish to add to the queue
             * @exception 'Only functions are allowed in the queue'
-            * @type void
+            * @type int|array
             */
             this.addToQueue = function( fn )
             {
+                var r = undefined;
+
                 switch( typeof fn )
                 {
                     case 'function':
-                        _queue.push( fn );
+                        r = _queue.length;
+                        _queue[ r ] = fn;
+
                         break;
 
                     case 'object':
                         if( fn instanceof Array )
                         {
+                            r = [];
+
                             for( var i = 0, l = fn.length; i < l; i++ )
-                                _animator.addToQueue( fn[ i ] );
+                                r.push( _animator.addToQueue( fn[ i ] ));
 
                             break;
                         }
@@ -204,11 +173,11 @@
                 return _animator;
             }
 
-           /**
+            /**
             * Removes a function from the queue
             * 
             * @param fn function - The function we wish to remove from the queue
-            * @type void
+            * @type Animator
             */
             this.removeFromQueue = function( fn )
             {
@@ -219,11 +188,11 @@
                 return _animator;
             }
 
-           /**
+            /**
             * Removes an item from the queue depending on specified index
             * 
             * @param index integer - The index we wish to remove
-            * @type void
+            * @type Animator
             */
             this.removeIndexFromQueue = function( index )
             {
@@ -232,7 +201,7 @@
                 return _animator;
             }
 
-           /**
+            /**
             * Returns the current queue
             * 
             * @type array
@@ -242,12 +211,12 @@
                 return _queue;
             }
 
-           /**
+            /**
             * Clears the old queue and sets a new one
             * 
             * @exception 'Only functions are allowed in the queue'
             * @param queue array - The queue new queue
-            * @type void
+            * @type Animator
             */
             this.setQueue = function( queue )
             {
@@ -257,10 +226,10 @@
                 return _animator;
             }
 
-           /**
+            /**
             * Unsets the queue
             * 
-            * @type void
+            * @type Animator
             */
             this.clearQueue = function()
             {
@@ -269,22 +238,22 @@
                 return _animator;
             }
 
-           /**
+            /**
             * Returns the specified element we wish to render on
             *
-            * @type Element
+            * @type Element|undefined
             */
             this.getElement = function()
             {
                 return _element;
             }
 
-           /**
+            /**
             * Not required. If specifyed one may optimize the animation
             *
             * @param element Element - [optional] The element we render in
             * @exception 'Unrecognized element'
-            * @type void
+            * @type Animator
             */
             this.setElement = function( element )
             {
@@ -303,10 +272,10 @@
                 return _animator;
             }
 
-           /**
+            /**
             * Removes the specified Element we render in
             * 
-            * @type void
+            * @type Animator
             */
             this.removeElement = function()
             {
@@ -345,14 +314,44 @@
                 animation[ animation.length - 1 ] = distance;
 
             return animation;
-        },
+        };
         
-        /* Animator is used for smother animations
+        /* Updating the default options with user defined
          */
-
-        animator = options.animator instanceof Animator
-                    ? options.animator
-                    : new Animator();
+        
+        options = $.extend(
+            {
+                // Cashes browsing events
+                'eventCash':
+                    true,
+                
+                // Determines if the buttons for left or right scrolling should
+                // be displayed
+                'showButtons':
+                    false,
+                
+                // Determines if thumbnails should be displayed
+                'showThumbnails':
+                    false,
+                
+                // If this option and 'showThumbnails' is both true, this
+                // option will use the first appering image in the li element
+                // as a representing thumbnail for that slide.
+                'useImagesForThumbnails':
+                    false,
+                
+                // Allows the user to specify a wrapper that containes the
+                // thumbnail container
+                // ..defaults to viewport
+                'thumbnailsWrapper':
+                    undefined,
+                
+                // Allows the user provide the Animator instance if desired
+                // .. desfults to a new instance of the Animator class
+                'animator':
+                    new Animator()
+            },
+            options );
         
         /* Looping through all elements we wish to create a slider from
          */
@@ -537,7 +536,7 @@
                                 // Will clear interval if we reached the end
                                 if( i == l )
                                 {
-                                    animator.removeFromQueue( loop );
+                                    options.animator.removeFromQueue( loop );
                                     
                                     // Removing flooded elements
                                     for( var n = 0; n < Math.abs( tick ); n++ )
@@ -580,7 +579,7 @@
                                     + 'px' );
                             };
                             
-                        animator.addToQueue( loop ).start();
+                        options.animator.addToQueue( loop ).start();
                     }
                     
                     /* Adding the buttons if specifyed in options
@@ -686,7 +685,8 @@
                         switch( typeof options.thumbnailsWrapper )
                         {
                             case 'string':
-                                thumbnailsWrapper = $( options.thumbnailsWrapper );
+                                thumbnailsWrapper = $(
+                                    options.thumbnailsWrapper );
                                 break;
                                 
                             case 'object':
