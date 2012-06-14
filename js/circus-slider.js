@@ -29,10 +29,12 @@
 
 ( function( $ )
 {
-    /* Throws 3 exceptions:
+    /* Throws the following exceptions:
      * - No ul element found
      * - More then 1 ul element found
      * - No li elements found
+     * - Only functions are allowed in the queue
+     * - Unrecognized element
      * 
      * Following options are available:
      * - eventCash [boolean]
@@ -40,6 +42,12 @@
      * - showThumbnails [boolean]
      * - useImagesForThumbnails [boolean]
      * - thumbnailsWrapper [selector]
+     * - animator [Animator]
+     * - preSlide [function]
+     * - postSlide [function]
+     * - thumbnailClick [function]
+     * - leftButtonClick [function]
+     * - rightButtonClick [function]
      */
     $.fn.circusSlider = function( options )
     {
@@ -68,8 +76,8 @@
             _running  = false,
 
             /**
-            * Handle to the callback-routine
-            */
+             * Handle to the callback-routine
+             */
             _requestAnimationFrame = ( function()
             {
                 return window.requestAnimationFrame
@@ -84,10 +92,10 @@
             })();
 
             /**
-            * Starts the animation loop, if not already running
-            * 
-            * @type Animator
-            */
+             * Starts the animation loop, if not already running
+             * 
+             * @type Animator
+             */
             this.start = function()
             {
                 if( !_running )
@@ -114,10 +122,10 @@
             }
 
             /**
-            * Stops/Pauses the animation loop, if running...
-            * 
-            * @type Animator
-            */
+             * Stops/Pauses the animation loop, if running...
+             * 
+             * @type Animator
+             */
             this.stop = function()
             {
                 _running = false;
@@ -126,23 +134,23 @@
             }
 
             /**
-            * Returns if animation loop is currently running
-            * 
-            * @type boolean
-            */
+             * Returns if animation loop is currently running
+             * 
+             * @type boolean
+             */
             this.isRunning = function()
             {
                 return _running;
             }
 
             /**
-            * Adds one ore many functions to the queue
-            * 
-            * @param fn array|function - The function, or an array of functions,
-            * we wish to add to the queue
-            * @exception 'Only functions are allowed in the queue'
-            * @type int|array
-            */
+             * Adds one ore many functions to the queue
+             * 
+             * @param fn array|function - The function, or an array of functions,
+             * we wish to add to the queue
+             * @exception 'Only functions are allowed in the queue'
+             * @type int|array
+             */
             this.addToQueue = function( fn )
             {
                 var r = undefined;
@@ -174,11 +182,11 @@
             }
 
             /**
-            * Removes a function from the queue
-            * 
-            * @param fn function - The function we wish to remove from the queue
-            * @type Animator
-            */
+             * Removes a function from the queue
+             * 
+             * @param fn function - The function we wish to remove from the queue
+             * @type Animator
+             */
             this.removeFromQueue = function( fn )
             {
                 for( var i = 0; i < _queue.length; i++ )
@@ -189,11 +197,11 @@
             }
 
             /**
-            * Removes an item from the queue depending on specified index
-            * 
-            * @param index integer - The index we wish to remove
-            * @type Animator
-            */
+             * Removes an item from the queue depending on specified index
+             * 
+             * @param index integer - The index we wish to remove
+             * @type Animator
+             */
             this.removeIndexFromQueue = function( index )
             {
                 _queue.splice( Math.floor( index ), 1 );
@@ -202,22 +210,22 @@
             }
 
             /**
-            * Returns the current queue
-            * 
-            * @type array
-            */
+             * Returns the current queue
+             * 
+             * @type array
+             */
             this.getQueue = function()
             {
                 return _queue;
             }
 
             /**
-            * Clears the old queue and sets a new one
-            * 
-            * @exception 'Only functions are allowed in the queue'
-            * @param queue array - The queue new queue
-            * @type Animator
-            */
+             * Clears the old queue and sets a new one
+             * 
+             * @exception 'Only functions are allowed in the queue'
+             * @param queue array - The queue new queue
+             * @type Animator
+             */
             this.setQueue = function( queue )
             {
                 _animator.clearQueue();
@@ -227,10 +235,10 @@
             }
 
             /**
-            * Unsets the queue
-            * 
-            * @type Animator
-            */
+             * Unsets the queue
+             * 
+             * @type Animator
+             */
             this.clearQueue = function()
             {
                 _queue = [];
@@ -239,22 +247,22 @@
             }
 
             /**
-            * Returns the specified element we wish to render on
-            *
-            * @type Element|undefined
-            */
+             * Returns the specified element we wish to render on
+             *
+             * @type Element|undefined
+             */
             this.getElement = function()
             {
                 return _element;
             }
 
             /**
-            * Not required. If specifyed one may optimize the animation
-            *
-            * @param element Element - [optional] The element we render in
-            * @exception 'Unrecognized element'
-            * @type Animator
-            */
+             * Not required. If specifyed one may optimize the animation
+             *
+             * @param element Element - [optional] The element we render in
+             * @exception 'Unrecognized element'
+             * @type Animator
+             */
             this.setElement = function( element )
             {
                 if( element == undefined )
@@ -273,10 +281,10 @@
             }
 
             /**
-            * Removes the specified Element we render in
-            * 
-            * @type Animator
-            */
+             * Removes the specified Element we render in
+             * 
+             * @type Animator
+             */
             this.removeElement = function()
             {
                 _element = undefined;
@@ -325,8 +333,9 @@
                 'eventCash':
                     true,
                 
-                // Determines if the buttons for left or right scrolling should
-                // be displayed
+                /* Determines if the buttons for left or right scrolling should
+                 * be displayed
+                 */
                 'showButtons':
                     false,
                 
@@ -334,22 +343,82 @@
                 'showThumbnails':
                     false,
                 
-                // If this option and 'showThumbnails' is both true, this
-                // option will use the first appering image in the li element
-                // as a representing thumbnail for that slide.
+                /* If this option and 'showThumbnails' is both true, this
+                 * option will use the first appering image in the li element
+                 * as a representing thumbnail for that slide.
+                 */
                 'useImagesForThumbnails':
                     false,
                 
-                // Allows the user to specify a wrapper that containes the
-                // thumbnail container
-                // ..defaults to viewport
+                /* Allows the user to specify a wrapper that containes the
+                 * thumbnail container
+                 * ..defaults to viewport
+                 */
                 'thumbnailsWrapper':
                     undefined,
                 
-                // Allows the user provide the Animator instance if desired
-                // .. desfults to a new instance of the Animator class
+                /* Allows the user provide the Animator instance if desired
+                 * .. desfults to a new instance of the Animator class
+                 */
                 'animator':
-                    new Animator()
+                    new Animator(),
+                
+                /* Creating the ability to hook in to the slider before the
+                 * animation has begun.
+                 */
+                'preSlide':
+                    
+                    /* @param tick int How far we will slide, negative number
+                     * for backwards and positive for forward.
+                     */
+                    function( tick ){},
+                
+                /* Creating the ability to hook in to the slider after the
+                 * animation has ended.
+                 */
+                'postSlide':
+                    
+                    /* @param tick int How far we have slided, negative number
+                     * for backwards and positive for forward.
+                     */
+                    function( tick ){},
+                
+                /* Creating the ability to hook a listener to the thumbnail.
+                 * If stopPropagation is called upon the event then the sliding
+                 * will be prevented.
+                 */
+                'thumbnailClick':
+                    
+                    /* @param thumbnail Element The thumnail element that was 
+                     * clicked upon
+                     * @param event Event The click event generated by clicking
+                     * the thumbnail
+                     */
+                    function( thumbnail, event ){},
+                
+                /* Creating the ability to hook a listener to the left button.
+                 * If stopPropagation is called upon the event then the sliding
+                 * will be prevented.
+                 */
+                'leftButtonClick':
+                    
+                    /* @param button Element The button that was clicked upon
+                     * @param event Event The click event generated by clicking
+                     * the button
+                     */
+                    function( button, event ){},
+                
+                /* Creating the ability to hook a listener to the right button.
+                 * If stopPropagation is called upon the event then the sliding
+                 * will be prevented.
+                 */
+                'rightButtonClick':
+                    
+                    /* @param button Element The button that was clicked upon
+                     * @param event Event The click event generated by clicking
+                     * the button
+                     */
+                    function( button, event ){}
             },
             options );
         
@@ -560,6 +629,7 @@
                                                 - length ) + 'px'
                                         });
 
+                                    options.postSlide( tick );
                                     ani = false;
                                     
                                     // Running cashed event
@@ -579,6 +649,7 @@
                                     + 'px' );
                             };
                             
+                        options.preSlide( tick );
                         options.animator.addToQueue( loop ).start();
                     }
                     
@@ -599,6 +670,7 @@
                                  */
                                 .append( $( '<div />' )),
                             
+                            // @see leftButton for documentation
                             rightButton = $( '<div />' )
                                 .addClass( 'circus-slider-right-button' )
                                 .append( $( '<div />' ));
@@ -607,14 +679,21 @@
                          */
 
                         leftButton.click(
-                            function()
+                            function( e )
                             {
+                                // A hook that could be defined by the user
+                                options.leftButtonClick( this, e );
+                                
+                                // The acctual sliding magic
                                 slide( -1 );
                             });
 
                         rightButton.click(
-                            function()
+                            // @see leftButton for documentation
+                            function( e )
                             {
+                                options.rightButtonClick( this, e );
+                                
                                 slide( 1 );
                             });
                         
@@ -653,8 +732,19 @@
                                         
                                         // Setting the event listener
                                         .click(
-                                            function()
+                                            function( e )
                                             {
+                                                // Calling users predifined hook
+                                                options.thumbnailClick(
+                                                    this,
+                                                    e );
+                                                
+                                                // If the hook stopped the
+                                                // propagation than that will
+                                                // prevent sliding
+                                                if( e.isPropagationStopped() )
+                                                    return;
+                                                
                                                 // Calculating a relevent path
                                                 var go = $( this ).attr(
                                                             'data-thumbnail' )
