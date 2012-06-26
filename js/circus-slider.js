@@ -690,32 +690,6 @@
                         options.animator.start();
                     }
                     
-                    /* Automatic sliding
-                     */
-                    
-                    if( typeof options.delay == 'number' )
-                    {
-                        var hover = false;
-                        
-                        ul.hover(
-                            function()
-                            { hover = true; },
-                            function()
-                            { hover = false; });
-                        
-                        setInterval(
-                            function()
-                            {
-                                if( document.hasFocus )
-                                    if( !document.hasFocus() )
-                                        return;
-                                
-                                if( !hover )
-                                    slide( 1 );
-                            },
-                            options.delay );
-                    }
-                    
                     /* Adding the buttons if specifyed in options
                      */
                     
@@ -948,6 +922,44 @@
                                     }
                                 });
                         }
+                    }
+                    
+                    /* Automatic sliding
+                     */
+                    
+                    if( typeof options.delay == 'number' )
+                    {
+                        var
+                        hover  = false,
+                        puseOn = $( ul );
+                        
+                        if( options.showButtons )
+                            puseOn = puseOn
+                                .add( leftButton )
+                                .add( rightButton );
+                            
+                        if( options.showThumbnails )
+                            puseOn = puseOn.add(
+                                '> .circus-slider-thumbnail', 
+                                thumbnailContainer );
+                        
+                        puseOn.hover(
+                            function()
+                            { hover = true; },
+                            function()
+                            { hover = false; });
+                        
+                        setInterval(
+                            function()
+                            {
+                                if( document.hasFocus )
+                                    if( !document.hasFocus() )
+                                        return;
+                                
+                                if( !hover )
+                                    slide( 1 );
+                            },
+                            options.delay );
                     }
                 });
         
