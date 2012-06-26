@@ -706,6 +706,10 @@
                         setInterval(
                             function()
                             {
+                                if( document.hasFocus )
+                                    if( !document.hasFocus() )
+                                        return;
+                                
                                 if( !hover )
                                     slide( 1 );
                             },
