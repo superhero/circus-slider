@@ -37,6 +37,7 @@
      * - Unrecognized element
      * 
      * Following options are available:
+     * - delay [int]
      * - eventCash [boolean]
      * - showButtons [boolean]
      * - showThumbnails [boolean]
@@ -357,6 +358,10 @@
         
         options = $.extend(
             {
+                // The delayed time between automatic sliding
+                'delay':
+                    undefined,
+              
                 // Cashes browsing events
                 'eventCash':
                     true,
@@ -683,6 +688,28 @@
                         options.preSlide( tick );
                         options.animator.addToQueue( loop );
                         options.animator.start();
+                    }
+                    
+                    /* Automatic sliding
+                     */
+                    
+                    if( typeof options.delay == 'number' )
+                    {
+                        var hover = false;
+                        
+                        ul.hover(
+                            function()
+                            { hover = true; },
+                            function()
+                            { hover = false; });
+                        
+                        setInterval(
+                            function()
+                            {
+                                if( !hover )
+                                    slide( 1 );
+                            },
+                            options.delay );
                     }
                     
                     /* Adding the buttons if specifyed in options
