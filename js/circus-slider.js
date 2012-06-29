@@ -71,17 +71,20 @@
             _element = undefined,
 
             // The queue
-            _queue    = [],
+            _queue = {},
+
+            // The queue id, auto increment
+            _queueId = 0,
 
             // A flag that determines if the loop is running
-            _running  = false,
+            _running = false,
 
             // The routines id
             _id,
 
             /**
-             * Handle to the callback-routine
-             */
+            * Handle to the callback-routine
+            */
             _requestAnimationFrame = ( function()
             {
                 return window.requestAnimationFrame
@@ -96,8 +99,8 @@
             })(),
 
             /**
-             * Handle to cancel the routine
-             */
+            * Handle to cancel the routine
+            */
             _cancelAnimationFrame = ( function()
             {
                 return window.cancelAnimationFrame
@@ -114,10 +117,10 @@
             })();
 
             /**
-             * Starts the animation loop, if not already running
-             * 
-             * @type Animator
-             */
+            * Starts the animation loop, if not already running
+            * 
+            * @type Animator
+            */
             this.start = function()
             {
                 if( !_running )
@@ -130,8 +133,9 @@
 
                         var queue = _animator.getQueue();
 
-                        for( var i = 0, l = queue.length; i < l; i++ )
-                            queue[ i ]();
+
+                        for( var key in queue )
+                            queue[ key ]();
                     })();
                 }
 
@@ -139,10 +143,10 @@
             }
 
             /**
-             * Stops/Pauses the animation loop, if running...
-             * 
-             * @type Animator
-             */
+            * Stops/Pauses the animation loop, if running...
+            * 
+            * @type Animator
+            */
             this.stop = function()
             {
                 _cancelAnimationFrame( _id );
@@ -153,52 +157,55 @@
             }
 
             /**
-             * Returns if animation loop is currently running
-             * 
-             * @type boolean
-             */
+            * Returns if animation loop is currently running
+            * 
+            * @type boolean
+            */
             this.isRunning = function()
             {
                 return _running;
             }
 
             /**
-             * Returns if the queue is empty
-             * 
-             * @type boolean
-             */
+            * Returns if the queue is empty
+            * 
+            * @type boolean
+            */
             this.isQueueEmpty = function()
             {
-                return _animator.getQueue().length == 0;
+                for( var key in _animator.getQueue() )
+                    return false;
+
+                return true;
             }
 
             /**
-             * Adds one ore many functions to the queue
-             * 
-             * @param fn array|function - The function, or an array of functions, we
-             * wish to add to the queue
-             * @exception 'Only functions are allowed in the queue'
-             * @type int|array
-             */
+            * Adds one ore many functions to the queue
+            * 
+            * @param fn array|function - The function, or an array of functions, we
+            * wish to add to the queue
+            * @exception 'Only functions are allowed in the queue'
+            * @type int|array
+            */
             this.addToQueue = function( fn )
             {
-                var r = undefined;
+                var id = undefined;
 
                 switch( typeof fn )
                 {
                     case 'function':
-                        r = _queue.length;
-                        _queue[ r ] = fn;
+                        id = ++_queueId;
+                        _queue[ id ] = fn;
 
                         break;
 
                     case 'object':
                         if( fn instanceof Array )
                         {
-                            r = [];
+                            id = [];
 
                             for( var i = 0, l = fn.length; i < l; i++ )
-                                r.push( _animator.addToQueue( fn[ i ] ));
+                                id.push( _animator.addToQueue( fn[ i ] ));
 
                             break;
                         }
@@ -207,54 +214,55 @@
                         throw 'Only functions are allowed in the queue';
                 }
 
-                return r;
+                return id;
             }
 
             /**
-             * Removes a function from the queue
-             * 
-             * @param fn function - The function we wish to remove from the queue
-             * @type Animator
-             */
+            * Removes a function from the queue
+            * 
+            * @param fn function|int - The function or id we wish to remove from the
+            * queue
+            * @exception 'Invalid type'
+            * @type Animator
+            */
             this.removeFromQueue = function( fn )
             {
-                for( var i = 0; i < _queue.length; i++ )
-                    if( _queue[ i ] == fn )
-                        _animator.removeIndexFromQueue( i-- );
+                switch( typeof fn )
+                {
+                    case 'number':
+                        delete _queue[ fn ];
+                        break;
+
+                    case 'function':
+                        for( var id in _queue )
+                            if( _queue[ id ] === fn )
+                                _animator.removeFromQueue( parseInt( id ));
+                        break;
+
+                    default:
+                        throw 'Invalid type';
+                }
 
                 return _animator;
             }
 
             /**
-             * Removes an item from the queue depending on specified index
-             * 
-             * @param index integer - The index we wish to remove
-             * @type Animator
-             */
-            this.removeIndexFromQueue = function( index )
-            {
-                _queue.splice( Math.floor( index ), 1 );
-
-                return _animator;
-            }
-
-            /**
-             * Returns the current queue
-             * 
-             * @type array
-             */
+            * Returns the current queue
+            * 
+            * @type Object
+            */
             this.getQueue = function()
             {
                 return _queue;
             }
 
             /**
-             * Clears the old queue and sets a new one
-             * 
-             * @exception 'Only functions are allowed in the queue'
-             * @param queue array - The queue new queue
-             * @type Animator
-             */
+            * Clears the old queue and sets a new one
+            * 
+            * @exception 'Only functions are allowed in the queue'
+            * @param queue array - The queue new queue
+            * @type Animator
+            */
             this.setQueue = function( queue )
             {
                 _animator.clearQueue();
@@ -264,34 +272,34 @@
             }
 
             /**
-             * Unsets the queue
-             * 
-             * @type Animator
-             */
+            * Unsets the queue
+            * 
+            * @type Animator
+            */
             this.clearQueue = function()
             {
-                _queue = [];
+                _queue = {};
 
                 return _animator;
             }
 
             /**
-             * Returns the specified element we wish to render on
-             *
-             * @type Element|undefined
-             */
+            * Returns the specified element we wish to render on
+            *
+            * @type Element|undefined
+            */
             this.getElement = function()
             {
                 return _element;
             }
 
             /**
-             * Not required. If specifyed one may optimize the animation
-             *
-             * @param element Element - [optional] The element we render in
-             * @exception 'Unrecognized element'
-             * @type Animator
-             */
+            * Not required. If specifyed one may optimize the animation
+            *
+            * @param element Element - [optional] The element we render in
+            * @exception 'Unrecognized element'
+            * @type Animator
+            */
             this.setElement = function( element )
             {
                 if( element == undefined )
@@ -310,10 +318,10 @@
             }
 
             /**
-             * Removes the specified Element we render in
-             * 
-             * @type Animator
-             */
+            * Removes the specified Element we render in
+            * 
+            * @type Animator
+            */
             this.removeElement = function()
             {
                 _element = undefined;
@@ -945,9 +953,9 @@
                         
                         puseOn.hover(
                             function()
-                            { hover = true; },
+                            {hover = true;},
                             function()
-                            { hover = false; });
+                            {hover = false;});
                         
                         setInterval(
                             function()
