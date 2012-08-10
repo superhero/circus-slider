@@ -2,7 +2,9 @@ Circus Slider - jQuery Plugin
 
 Copyright (c) 2012 Erik Landvall
 
-Requires: jQuery
+Requires jQuery and Animator
+    http://jquery.com/
+    https://github.com/erik-landvall/animator
 
 Licensed under the GPL license:
     http://www.gnu.org/licenses/gpl.html
