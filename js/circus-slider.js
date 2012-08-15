@@ -679,36 +679,44 @@
                     if( typeof options.delay == 'number' )
                     {
                         var
-                        hover  = false,
                         puseOn = $( ul );
                         
                         if( options.showButtons )
                             puseOn = puseOn
                                 .add( leftButton )
                                 .add( rightButton );
-                            
+                        
                         if( options.showThumbnails )
                             puseOn = puseOn.add(
                                 '> .circus-slider-thumbnail', 
                                 thumbnailContainer );
                         
+                        var
+                        
+                        intervalCallback = function()
+                        {
+                            if( document.hasFocus )
+                                if( !document.hasFocus() )
+                                    return;
+                                
+                            slide( 1 );
+                        },
+                        
+                        intervalID = setInterval(
+                            intervalCallback,
+                            options.delay );
+                        
                         puseOn.hover(
                             function()
-                            {hover = true;},
-                            function()
-                            {hover = false;});
-                        
-                        setInterval(
+                            {
+                                clearInterval( intervalID );
+                            },
                             function()
                             {
-                                if( document.hasFocus )
-                                    if( !document.hasFocus() )
-                                        return;
-                                
-                                if( !hover )
-                                    slide( 1 );
-                            },
-                            options.delay );
+                                intervalID = setInterval(
+                                    intervalCallback,
+                                    options.delay );
+                            });
                     }
                 });
         
